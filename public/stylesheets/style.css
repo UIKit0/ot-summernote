@@ -1,0 +1,15 @@
+body {
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+body #editorCont {
+  display: none;
+}
+body #editor {
+  width: 100%;
+}
+body #console {
+  padding: 5px;
+  border: 1px solid black;
+  height: 230px;
+  overflow: scroll;
+}
