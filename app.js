@@ -53,7 +53,7 @@ var docs = (function(changeset) {
 })(require('changesets').Changeset);
 
 /*********************
- * for Cuncurrent
+ * for concurrency
  *********************/
 var socketIO = require('socket.io');
 var io = socketIO.listen(server);
