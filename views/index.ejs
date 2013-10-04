@@ -3,6 +3,7 @@
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <!-- jquery, bootstrap, summernote -->
     <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.no-icons.min.css" rel="stylesheet">
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
@@ -10,80 +11,34 @@
     <link href="//hackerwins.github.io/summernote/summernote.css" rel="stylesheet">
     <script src="//hackerwins.github.io/summernote/summernote.min.js"></script>
 
+    <!-- socket.io, client-side(changesets) -->
     <script type="text/javascript" src="/javascripts/socket.io.js"></script>
     <script type="text/javascript" src="/javascripts/client-side.js"></script>
+
+    <!-- ot-summernote -->
+    <script type="text/javascript" src="/javascripts/ot-summernote.js"></script>
     <script type="text/javascript">
       $(document).ready(function() {
-        // connect socket
-        var socket = io.connect('http://localhost:3001');
-
-        // log  
-        var consoleLog = function(sLog) {
-          $('#console').html(sLog +  '<br/>' + $('#console').html());
-        };
-
-        // login
-        $('#join').on('click', function(e) {
-          var username = $('#username').val();
-          if (!username) { return; }
-
-          $('#loginCont').slideUp('fast', function() {
-            $('#editorCont').slideDown('fast');
-            socket.json.send({type: 'login', user: username});
-            connect(username);
-          });
+        var ot = otsummernote.create({
+          url: 'http://localhost:3000',
+          listener: function(code) {
+            $('#editor').code(code);
+          }
         });
-
-        var connect = function() {
-          socket.on('message', function (msg) {
-            if (msg) {
-              consoleLog('Remote: ' + msg); // test
-              var changes = changesets.Changeset.unpack(msg);
-              $('#editor').code(changes.apply($('#editor').code()));
-            } else {
-              consoleLog("There is a problem:", msg);
-            }
-          });
-
-          // editor summernote
-          var code;
-          $('#editor').summernote({
-            onkeyup: function(e) {
-              var current = $(this).code();
-              var changes = changesets.Changeset.fromDiff(code, current);
-
-              consoleLog('Me: ' + changes);
-
-              // pack and send
-              socket.json.send({type: 'edit', message: changes.pack()});
-              code = current;
-            }, height: 170, focus: true
-          });
-          code = $('#editor').code();
-        };
+        // editor summernote
+        $('#editor').summernote({
+          height: 170, focus: true,
+          onkeyup: function(e) {
+            ot.operation($(this).code());
+          }
+        });
       });
     </script>
   </head>
   <body>
   <div class="container">
     <h1 class="text-center"><%=title%></h1>
-    <div class="login" id="loginCont">
-      <div class="input-group">
-        <input type="text" class="form-control" placeholder="username" id="username" autofocus>
-        <span class="input-group-btn">
-          <button class="btn btn-default" type="button" id="join">Join</button>
-        </span>
-      </div>
-    </div>
     <div class="editor" id="editorCont">
-      <h4>Console</h4>
-      <div class="row">
-        <div class="col-xs-12">
-          <div id="console"></div>
-        </div>
-      </div>
-      <hr/>
-      <h4>Main Editor</h4>
       <div class="row">
         <div class="col-xs-12">
           <div id="editor"></div>
