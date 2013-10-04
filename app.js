@@ -57,6 +57,8 @@ var docs = (function(changeset) {
  *********************/
 var socketIO = require('socket.io');
 var io = socketIO.listen(server);
+io.set('log level', 1);
+
 io.sockets.on('connection', function (socket) {
   socket.on('message', function (msg) {
     var type = msg.type, data = msg.data;
